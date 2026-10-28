@@ -78,3 +78,74 @@ class SistemaGPS:
 
         return distancias[fin], ruta
 
+def interfaz_consola():
+    gps = SistemaGPS()
+    
+    # Carga de datos iniciales de prueba
+    gps.agregar_ruta("Managua", "Tipitapa", 25.0)
+    gps.agregar_ruta("Managua", "Masaya", 30.0)
+    gps.agregar_ruta("Masaya", "Granada", 20.0)
+    gps.agregar_ruta("Tipitapa", "Juigalpa", 90.0)
+
+    while True:
+        print("\n========================================")
+        print("    SISTEMA DE NAVEGACION GPS - MENU    ")
+        print("========================================")
+        print("1. Ver todas las ciudades y rutas")
+        print("2. Agregar nueva ruta o ciudad")
+        print("3. Consultar ruta mas rapida")
+        print("4. Salir")
+        
+        opcion = input("Seleccione una opcion (1-4): ").strip()
+
+        if opcion == "1":
+            ciudades = gps.obtener_ciudades()
+            if not ciudades:
+                print("\nNo hay ciudades registradas en el sistema.")
+            else:
+                print("\n--- MAPA DE CIUDADES Y AUTOPISTAS ---")
+                for ciudad, destinos in gps.grafo.items():
+                    print(f"Ciudad: {ciudad}")
+                    if not destinos:
+                        print("  -> Sin autopistas salientes registradas.")
+                    for dest, tiempo in destinos.items():
+                        print(f"  -> Conecta con {dest} [Tiempo: {tiempo} minutos]")
+
+        elif opcion == "2":
+            try:
+                print("\n--- AGREGAR NUEVA RUTA ---")
+                origen = input("Ingrese ciudad de origen: ").strip()
+                destino = input("Ingrese ciudad de destino: ").strip()
+                tiempo_str = input("Ingrese el tiempo de viaje en minutos: ").strip()
+                
+                tiempo = float(tiempo_str)
+                gps.agregar_ruta(origen, destino, tiempo)
+                print("\nRuta agregada exitosamente al sistema.")
+            except ValueError as e:
+                print(f"\nError de validacion: {e}")
+
+        elif opcion == "3":
+            try:
+                print("\n--- CONSULTAR RUTA MAS RAPIDA ---")
+                origen = input("Ingrese ciudad de origen: ").strip()
+                fin = input("Ingrese ciudad de destino: ").strip()
+                
+                tiempo_total, ruta = gps.consultar_ruta_mas_rapida(origen, fin)
+                
+                if tiempo_total == float('inf'):
+                    print(f"\nNo existe una ruta posible entre '{origen}' y '{fin}'.")
+                else:
+                    print(f"\nResultado de la busqueda:")
+                    print(f"  - Tiempo total estimado: {tiempo_total} minutos")
+                    print(f"  - Recorrido completo: {' -> '.join(ruta)}")
+            except (KeyError, ValueError) as e:
+                print(f"\nError: {e}")
+
+        elif opcion == "4":
+            print("\nSaliendo del Sistema de Navegacion GPS. Hasta pronto.")
+            break
+        else:
+            print("\nOpcion invalida. Por favor, seleccione un numero del 1 al 4.")
+
+if __name__ == "__main__":
+    interfaz_consola()
